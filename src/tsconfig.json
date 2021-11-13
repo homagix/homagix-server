@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": "/",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "lib": ["es2020"]
+  },
+  "include": ["./**/*.ts"]
+}
