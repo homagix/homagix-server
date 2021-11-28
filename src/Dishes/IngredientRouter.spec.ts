@@ -1,7 +1,6 @@
 import expect from "expect"
 import express, { Request, Response } from "express"
 import request from "supertest"
-import bodyParser from "body-parser"
 import Router from "./IngredientRouter"
 import Controller from "./IngredientController"
 import Store from "../EventStore/Store.mock"
@@ -15,7 +14,7 @@ const jsonResult =
 const controller = Controller({ models, store })
 const router = Router({ controller, jsonResult })
 const app = express()
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(router)
 
 describe("IngredientRouter", () => {

@@ -1,4 +1,3 @@
-import expect from "expect"
 import EventStore, { Store } from "./EventStore"
 import logger from "../lib/MockLogger"
 

@@ -1,4 +1,3 @@
-import expect from "expect"
 import Store from "../EventStore/Store.mock"
 import MockedModel from "./MockedModel"
 

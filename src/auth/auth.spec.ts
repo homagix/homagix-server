@@ -1,4 +1,3 @@
-import expect from "expect"
 import jsonwebtoken from "jsonwebtoken"
 import AuthFactory, { AuthUser } from "./auth"
 import Store from "../EventStore/Store.mock"
