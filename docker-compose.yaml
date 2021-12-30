@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  homagix-server:
+    image: joschi64/homagix-server
+    volumes:
+      - /var/apps/homagix-server:/app/data/
+    ports:
+      - 8200:8200
+    environment:
+      - BASEURL=https://homagix-server.dilab.co
+      - SECRET=my-extremely-confidential-SECRET
+      - MAIL_FROM=homagix@dilab.co
+      - SMTP_HOST=smtp.ethereal.email
+      - SMTP_PORT=587
+      - SMTP_USER=
+      - SMTP_PASSWORD=

@@ -8,6 +8,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:types": "tsc",
     "build": "esbuild --bundle --platform=node --sourcemap ./src --outfile=build/server.js",
+    "docker:build": "docker build -t homagix-server .",
     "start": "NOD_ENV=production node -r dotenv-flow/config build/server.js"
   },
   "author": "Joachim Schirrmacher <joachim@dilab.co>",

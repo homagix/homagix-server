@@ -53,12 +53,14 @@ You need to restart the server when you add a new dish or make changes to an exi
     # Add some dishes (as described above) in `/data/dishes`.
     npm start
 
-Alternatively, if you have [Docker](https://docs.docker.com/get-docker/) installed, you can use [a Docker image](https://hub.docker.com/r/joschi64/homagix). To use it, create a `data` folder locally containing some dishes you want to use, and enter this command:
+Alternatively, if you have [Docker](https://docs.docker.com/get-docker/) installed, you can use [a Docker image](https://hub.docker.com/r/joschi64/homagix-server). To use it, create a `data` folder locally containing some dishes you want to use, and enter this command:
 
-    docker run -it --rm -v ${pwd}/data:/app/data -p 8200:8200 joschi64/homagix
+    docker run -it --rm -v ${pwd}/data:/app/data -p 8200:8200 -e SECRET=my-extremely-confidential-SECRET joschi64/homagix-server
 
-You should set the configuration to match your environment. To do this, copy `.env` to `.env.production` and
-change whatever is nececessary. Please note, that changing `SECRET` will make stored password hashes invalid,
-so all users need to reset their passwords. This requires that the SMTP settings specify a valid SMTP server.
+You can also copy `.env.template` to `.env.production` and change whatever is nececessary. Please note, that changing `SECRET` will make stored password hashes invalid, so all users need to reset their passwords. This requires that the SMTP settings specify a valid SMTP server.
 
 If you use the docker image, you can set the environment via `-e` parameters, or, you could mount the `.env.production` file too, by adding `-v ${pwd}/.env.production:/app/.env.production`.
+
+Another option is to use the `docker-compose.yaml` file included in the repository. To use it, call
+
+    docker compose up -d
