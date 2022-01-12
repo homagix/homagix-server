@@ -5,7 +5,7 @@ import { Strategy as JwtStrategy } from "passport-jwt"
 import session from "express-session"
 import bcrypt from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
-import { v4 as uuid } from "uuid"
+import { randomUUID } from "crypto"
 import {
   NextFunction,
   Request,
@@ -88,7 +88,7 @@ export default ({
   function register(newUser: NewUser, req: Request, res: Response): User {
     const user = {
       ...newUser,
-      id: uuid(),
+      id: randomUUID(),
       password: bcrypt.hashSync(newUser.password, 10),
     }
     store.dispatch(userAdded(user))
@@ -101,7 +101,7 @@ export default ({
   }
 
   function generateAccessCode(user: AuthUser): void {
-    user.accessCode = uuid()
+    user.accessCode = randomUUID()
     store.dispatch(userChanged(user.id, user))
   }
 

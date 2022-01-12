@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import YAML from "yaml"
-import { v4 as uuid } from "uuid"
+import { randomUUID } from "crypto"
 import units from "../models/units"
 import { Store } from "../EventStore/EventStore"
 import { Models } from "../models"
@@ -48,7 +48,7 @@ export default function ({
     if (existing && existing.id) {
       await dispatchter(ingredientAssigned(dishId, existing.id, item.amount))
     } else {
-      const id = uuid()
+      const id = randomUUID()
       await dispatchter(
         ingredientAdded({
           id,

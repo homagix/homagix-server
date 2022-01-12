@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid"
+import { randomUUID } from "crypto"
 import { Store } from "../EventStore/EventStore"
 import { Models } from "../models"
 import { Ingredient } from "../models/ingredient"
@@ -41,7 +41,7 @@ export default ({
   }
 
   async function addIngredient(ingredient: Ingredient): Promise<Ingredient> {
-    ingredient.id = uuid()
+    ingredient.id = randomUUID()
     ingredient.group = "other"
     await store.dispatch(ingredientAdded(ingredient))
     return ingredient

@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid"
+import { randomUUID } from "crypto"
 import { Store } from "../EventStore/EventStore"
 import { Models } from "../models"
 import { Dish } from "../models/dish"
@@ -68,7 +68,7 @@ export default function ({
     },
 
     async addDish(data: ReadableDish, user: User): Promise<Dish> {
-      const dishId = uuid()
+      const dishId = randomUUID()
       const dish = {
         id: dishId,
         name: data.name,

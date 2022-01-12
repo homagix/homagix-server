@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid"
+import { randomUUID } from "crypto"
 import { assert } from "../EventStore/Events"
 import { Store, Event } from "../EventStore/EventStore"
 import { ModelWriter } from "./ModelWriter"
@@ -84,7 +84,7 @@ export function DishMutators(
         "ownedBy",
       ]
       const dish = Object.assign({}, ...fields.map(f => ({ [f]: event[f] })))
-      dish.id = dish.id || uuid()
+      dish.id = dish.id || randomUUID()
       dish.items = dish.items || []
       dishes.byId[dish.id] = dish
       dishes.byName[dish.name.toLowerCase()] = dish
