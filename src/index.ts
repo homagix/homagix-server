@@ -43,7 +43,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use("/api", router)
+app.use("/", router)
 app.use(history({}))
 app.use("/", express.static(path.join(__dirname, "..", "frontend")))
 app.use("/", express.static(path.join(baseDir, "public")))
