@@ -3,7 +3,7 @@ name: CI / CD for joschi64/homagix-server
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
 
 jobs:
@@ -61,3 +61,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
+
+      - name: Webhook
+        uses: joelwmale/webhook-action@master
+        with:
+          url: ${{ secrets.UPDATE_WEBHOOK }}
