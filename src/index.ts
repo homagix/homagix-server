@@ -6,12 +6,12 @@ import EventStore from "./EventStore/EventStore"
 import DishReader from "./Dishes/DishReader"
 import MainRouter from "./MainRouter"
 import ModelWriter from "./models/ModelWriter"
-import history from "connect-history-api-fallback"
 import Auth from "./auth/auth"
 import listRoutes from "./lib/listRoutes"
 import Config from "./Config"
 
 const logger = console
+const isDev = process.env.NODE_ENV === "development"
 
 const { nodeEnv, baseDir, dataDir, PORT } = Config()
 
@@ -29,24 +29,25 @@ app.use(express.json())
 const auth = Auth({ app, models, store, secretOrKey: process.env.SECRET || "" })
 const router = MainRouter({ models, store, auth })
 
-if (process.env.NODE_ENV === "development") {
-  app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Methods", "*")
-    res.header("Access-Control-Allow-Headers", "*")
-    next()
-  })
-}
+const referrers = process.env.ALLOWED_REFERRERS?.split(",")
 
 app.use((req, res, next) => {
-  logger.info(req.method + " " + req.path)
+  const referrer = req.headers["origin"] as string
+  console.log(req.headers)
+  if (isDev || (referrers && referrers?.includes(referrer))) {
+    res.header("Access-Control-Allow-Origin", referrer)
+    res.header("Access-Control-Allow-Methods", "*")
+    res.header("Access-Control-Allow-Headers", "*")
+  }
+  next()
+})
+
+app.use((req, res, next) => {
+  logger.debug(req.method + " " + req.path)
   next()
 })
 
 app.use("/", router)
-app.use(history({}))
-app.use("/", express.static(path.join(__dirname, "..", "frontend")))
-app.use("/", express.static(path.join(baseDir, "public")))
 app.use("/images", express.static(path.join(dataDir, "images")))
 
 app.use(function (
