@@ -29,13 +29,12 @@ app.use(express.json())
 const auth = Auth({ app, models, store, secretOrKey: process.env.SECRET || "" })
 const router = MainRouter({ models, store, auth })
 
-const referrers = process.env.ALLOWED_REFERRERS?.split(",")
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",")
 
 app.use((req, res, next) => {
-  const referrer = req.headers["origin"] as string
-  console.log(req.headers)
-  if (isDev || (referrers && referrers?.includes(referrer))) {
-    res.header("Access-Control-Allow-Origin", referrer)
+  const origin = req.headers["origin"] as string
+  if (isDev || (allowedOrigins && allowedOrigins?.includes(origin))) {
+    res.header("Access-Control-Allow-Origin", origin)
     res.header("Access-Control-Allow-Methods", "*")
     res.header("Access-Control-Allow-Headers", "*")
   }
