@@ -5,7 +5,7 @@ import { ModelWriter } from "./ModelWriter"
 export type User = {
   id: string
   firstName: string
-  email: string
+  email?: string
   listId?: string
   isAdmin?: boolean
 }
@@ -35,8 +35,10 @@ export default function ({
     userAdded(user: User) {
       assert(user, "No user")
       assert(user.id, "No id")
-      assert(user.email, "No email")
-      assert(user.email.match(/.+@.+\..+/), "email has wrong format")
+      assert(
+        !user.email || user.email.match(/.+@.+\..+/),
+        "email has wrong format"
+      )
       return { type: "userAdded", user }
     },
 
@@ -80,15 +82,15 @@ export default function ({
 
   store.on(events.userRemoved, (event: Event) => {
     const { id } = event as { id: string }
-    delete byEmail[users[id].email]
+    users[id].email && delete byEmail[users[id].email as string]
     delete users[id]
     modelWriter.removeUser(id)
   })
 
   store.on(events.userChanged, (event: Event) => {
     const { id, user } = event as { id: string; user: Partial<User> }
-    if (user.email && users[id].email && byEmail[users[id].email]) {
-      delete byEmail[users[id].email]
+    if (user.email && users[id].email && byEmail[users[id].email as string]) {
+      delete byEmail[users[id].email as string]
     }
     Object.assign(users[id], { ...user, id })
     if (user.email) {

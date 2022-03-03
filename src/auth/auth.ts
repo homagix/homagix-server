@@ -89,7 +89,8 @@ export default ({
     const user = {
       ...newUser,
       id: randomUUID(),
-      password: bcrypt.hashSync(newUser.password, 10),
+      accessCode: randomUUID(),
+      password: newUser.password && bcrypt.hashSync(newUser.password, 10),
     }
     store.dispatch(userAdded(user))
     signIn(user, req, res)
