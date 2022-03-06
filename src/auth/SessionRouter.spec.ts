@@ -35,7 +35,7 @@ const auth = {
     }
   },
 
-  signIn() {
+  login() {
     log.push("auth.signIn")
     return "test-token"
   },
@@ -99,9 +99,9 @@ describe("SessionRouter", () => {
     })
   })
 
-  describe("GET /session/logout", () => {
+  describe("DELETE /session", () => {
     it(`should invalidate the user's session`, async () => {
-      await request(app).get("/session/logout").expect(200)
+      await request(app).delete("/session").expect(200)
       expect(log).toEqual(["auth.logout"])
     })
   })

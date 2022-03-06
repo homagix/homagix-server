@@ -5,6 +5,7 @@ import DishList, { DishListModel } from './dishList'
 import User, { UserModel } from './user'
 import { Store } from '../EventStore/EventStore'
 import { ModelWriter } from './ModelWriter'
+import { ModelReader } from './ModelReader'
 
 export type Models = {
   dish: DishModel
@@ -17,9 +18,11 @@ export type Models = {
 export default function ({
   store,
   modelWriter,
+  modelReader,
 }: {
   store: Store
   modelWriter: ModelWriter
+  modelReader: ModelReader
 }): Models {
   const models = {} as Models
 
@@ -27,7 +30,7 @@ export default function ({
   models.ingredient = Ingredient({ store, models, modelWriter })
   models.dishHistory = DishHistory({ store, models, modelWriter })
   models.dishList = DishList({ store, models, modelWriter })
-  models.user = User({ store, modelWriter })
+  models.user = User({ store, modelWriter, modelReader })
 
   return models
 }

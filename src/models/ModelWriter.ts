@@ -16,7 +16,7 @@ export type ModelWriter = {
   writeDishHistory(listId: string, list: Record<string, string>): void
 }
 
-export default function ModelWriterFactory({ basePath }: { basePath: string }): ModelWriter {
+export default function ModelWriterFactory(basePath: string): ModelWriter {
   function writer(name: string) {
     const base = path.join(basePath, name)
     fs.mkdirSync(base, { recursive: true })

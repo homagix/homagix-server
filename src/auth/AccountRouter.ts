@@ -3,7 +3,6 @@ import { Store } from "../EventStore/EventStore"
 import { HTTPError } from "../lib/HTTPError"
 import { Mailer } from "../Mailer"
 import { Models } from "../models"
-import { User } from "../models/user"
 import { Auth, AuthUser, IUserRequest } from "./auth"
 
 function sendUserInfo(user: AuthUser, res: Response): void {
@@ -66,10 +65,10 @@ export default ({
     }
   }
 
-  function resetPassword(req: Request, res: Response, next: NextFunction) {
+  function loginWithCode(req: Request, res: Response, next: NextFunction) {
     try {
-      auth.signIn((req as IUserRequest).user as User, req, res)
-      res.redirect("/setPassword")
+      const user = (req as IUserRequest).user
+      res.json({ token: user.token })
     } catch (error) {
       next(error)
     }
@@ -87,7 +86,7 @@ export default ({
 
   const router = express.Router()
   router.post("/accessLinks", sendAccessLink)
-  router.get("/:id/access-codes/:accessCode", auth.requireCode(), resetPassword)
+  router.get("/:id/access-codes/:accessCode", auth.requireCode(), loginWithCode)
   router.patch("/:id", auth.requireJWT(), updatePassword)
   router.post("/", registerNewUser)
   return router

@@ -1,5 +1,6 @@
 import { assert } from "../EventStore/Events"
 import { Event, Store } from "../EventStore/EventStore"
+import { ModelReader } from "./ModelReader"
 import { ModelWriter } from "./ModelWriter"
 
 export type User = {
@@ -10,27 +11,17 @@ export type User = {
   isAdmin?: boolean
 }
 
-export type UserModel = {
-  getAll(): User[]
-  getById(userId: string): User
-  getByEMail(email: string, throwIfNotFound?: boolean): User
-  adminIsDefined: boolean
-  events: {
-    userAdded(user: User): Event
-    userRemoved(id: string): Event
-    userChanged(id: string, user: User): Event
-    invitationAccepted(user: User, listId: string): Event
-  }
-  reset(): void
-}
+export type UserModel = ReturnType<typeof Factory>
 
-export default function ({
+export default function Factory({
   store,
+  modelReader,
   modelWriter,
 }: {
   store: Store
+  modelReader: ModelReader
   modelWriter: ModelWriter
-}): UserModel {
+}) {
   const events = {
     userAdded(user: User) {
       assert(user, "No user")
@@ -68,8 +59,7 @@ export default function ({
   const users = {} as Record<string, User>
   let adminIsDefined = false
 
-  store.on(events.userAdded, (event: Event) => {
-    const { user } = event as { user: User }
+  function addUser(user: User) {
     users[user.id] = user
     if (user.email) {
       byEmail[user.email] = user
@@ -77,6 +67,11 @@ export default function ({
     if (user.isAdmin) {
       adminIsDefined = true
     }
+  }
+
+  store.on(events.userAdded, (event: Event) => {
+    const { user } = event as { user: User }
+    addUser(user)
     modelWriter.writeUser(user)
   })
 
@@ -104,6 +99,8 @@ export default function ({
     users[userId].listId = listId
     modelWriter.writeUser(users[userId])
   })
+
+  modelReader("users").forEach(addUser)
 
   return {
     getAll() {

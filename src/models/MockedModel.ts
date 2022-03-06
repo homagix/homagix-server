@@ -1,5 +1,5 @@
-import { Store } from '../EventStore/EventStore'
-import ModelsFactory, { Models } from './index'
+import { Store } from "../EventStore/EventStore"
+import ModelsFactory, { Models } from "./index"
 
 const emptyFunc = (): void => {
   // Don't do anything
@@ -14,6 +14,8 @@ const modelWriter = {
   writeDishHistory: emptyFunc,
 }
 
+const modelReader = () => []
+
 export default ({ store }: { store: Store }): Models => {
-  return ModelsFactory({ store, modelWriter })
+  return ModelsFactory({ store, modelWriter, modelReader })
 }

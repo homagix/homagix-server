@@ -1,15 +1,15 @@
-import express, { Request, Response, Router } from 'express'
-import { AuthUser, MiddleWare } from './auth'
+import express, { Request, Response, Router } from "express"
+import { AuthUser, MiddleWare } from "./auth"
 
-export default ({
-  auth,
-}: {
+type ISessionRouter = {
   auth: {
     requireJWT: MiddleWare
     requireLogin: MiddleWare
     logout: (res: Response) => void
   }
-}): Router => {
+}
+
+export default ({ auth }: ISessionRouter): Router => {
   function getUserInfo(req: Request, res: Response) {
     const user = { ...(req.user || {}) } as AuthUser
     delete user.password
@@ -27,9 +27,9 @@ export default ({
 
   const router = express.Router()
 
-  router.get('/', auth.requireJWT({ allowAnonymous: true }), getUserInfo)
-  router.post('/', auth.requireLogin(), loginWithPassword)
-  router.get('/logout', logout)
+  router.get("/", auth.requireJWT({ allowAnonymous: true }), getUserInfo)
+  router.post("/", auth.requireLogin(), loginWithPassword)
+  router.delete("/", logout)
 
   return router
 }

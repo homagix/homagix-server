@@ -5,6 +5,7 @@ import Models from "./models/index"
 import EventStore from "./EventStore/EventStore"
 import DishReader from "./Dishes/DishReader"
 import MainRouter from "./MainRouter"
+import ModelReader from "./models/ModelReader"
 import ModelWriter from "./models/ModelWriter"
 import Auth from "./auth/auth"
 import listRoutes from "./lib/listRoutes"
@@ -16,8 +17,9 @@ const isDev = process.env.NODE_ENV === "development"
 const { nodeEnv, baseDir, dataDir, PORT } = Config()
 
 const store = EventStore({ logger })
-const modelWriter = ModelWriter({ basePath: dataDir })
-const models = Models({ store, modelWriter })
+const modelReader = ModelReader(dataDir)
+const modelWriter = ModelWriter(dataDir)
+const models = Models({ store, modelReader, modelWriter })
 
 const dishReader = DishReader({ store, models })
 

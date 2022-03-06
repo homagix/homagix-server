@@ -61,7 +61,7 @@ export default function ({
     auth,
   })
 
-  router.use("/sessions", sessionRouter)
+  router.use("/session", sessionRouter)
   router.use("/accounts", accountRouter)
   router.use("/dishes", dishRouter)
   router.use("/ingredients", ingredientRouter)

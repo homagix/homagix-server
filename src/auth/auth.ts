@@ -18,7 +18,11 @@ import { Models } from "../models"
 import { User } from "../models/user"
 
 export type DoneFunction = (error: string | null, user: User | false) => void
-export type AuthUser = User & { accessCode?: string; password?: string }
+export type AuthUser = User & {
+  accessCode?: string
+  password?: string
+  token?: string
+}
 export type MiddleWare = (options?: Record<string, unknown>) => RequestHandler
 
 export interface IUserRequest extends Request {
@@ -31,27 +35,9 @@ type NewUser = {
   password: string
 }
 
-export type Auth = {
-  signIn(user: User, req: Request, res: Response): void
-  register(user: NewUser, req: Request, res: Response): User
-  setPassword(user: AuthUser, newPassword: string): void
-  logout: (req: Response) => void
-  generateAccessCode(user: AuthUser): void
-  resetAccessCode(user: AuthUser): void
+export type Auth = ReturnType<typeof Factory>
 
-  authenticate(
-    type: string | string[],
-    options: { allowAnonymous?: boolean }
-  ): RequestHandler
-  requireCode: MiddleWare
-  requireJWT: MiddleWare
-  checkJWT: MiddleWare
-  requireLogin: MiddleWare
-  requireAuth: MiddleWare
-  requireAdmin: MiddleWare
-}
-
-export default ({
+export default function Factory({
   app,
   models,
   store,
@@ -61,18 +47,18 @@ export default ({
   models: Models
   store: Store
   secretOrKey: string
-}): Auth => {
+}) {
   const { userAdded, userChanged } = models.user.events
   app.use(
     session({ secret: secretOrKey, resave: true, saveUninitialized: true })
   )
 
-  function signIn(user: User, req: Request, res: Response): void {
+  function login(user: AuthUser, req: Request, res: Response) {
     const roles = [] as string[]
     if (user.isAdmin) {
       roles.push("admin")
     }
-    const token = jsonwebtoken.sign(
+    user.token = jsonwebtoken.sign(
       {
         sub: user.id,
         firstName: user.firstName,
@@ -81,7 +67,7 @@ export default ({
       secretOrKey,
       { expiresIn: "24h" }
     )
-    res.cookie("token", token, { maxAge: 24 * 60 * 60 * 1000 })
+    res.cookie("token", user.token, { maxAge: 24 * 60 * 60 * 1000 })
     req.user = user
   }
 
@@ -93,7 +79,7 @@ export default ({
       password: newUser.password && bcrypt.hashSync(newUser.password, 10),
     }
     store.dispatch(userAdded(user))
-    signIn(user, req, res)
+    login(user, req, res)
     return user
   }
 
@@ -149,7 +135,7 @@ export default ({
         } else if (!req.user && !user && !options.allowAnonymous) {
           res.status(401).json({ error: "Not authenticated" })
         } else if (!req.user && user) {
-          signIn(user, req, res)
+          login(user, req, res)
           next()
         } else {
           next()
@@ -187,9 +173,9 @@ export default ({
 
   return {
     authenticate,
-    signIn,
     register,
     setPassword,
+    login,
     logout,
     generateAccessCode,
     resetAccessCode,
