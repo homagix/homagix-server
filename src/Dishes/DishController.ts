@@ -1,3 +1,4 @@
+import { DishList } from "./../models/dishList"
 import { randomUUID } from "crypto"
 import { Store } from "../EventStore/EventStore"
 import { Models } from "../models"
@@ -5,38 +6,24 @@ import { Dish } from "../models/dish"
 import { User } from "../models/user"
 import { DishReader, ReadableItem } from "./DishReader"
 
-type ReadableDish = {
+type WritableDish = {
   name: string
   recipe: string
   source: string
   items: ReadableItem[]
+  isFavorite?: boolean
 }
 
-export type DishController = {
-  getAll(user?: User): Dish[]
-  addDish(data: ReadableDish, user: User): Promise<Dish>
-  updateDish(id: string, dish: Partial<Dish>, user: User): Promise<Dish>
-  setFavorite(user: User, dishId: string, isFavorite: boolean): Promise<Dish>
-  canEdit(user: User, dishId: string): boolean
-  addItem(dishId: string, item: ReadableItem, user: User): Promise<Dish>
-  removeItem(dishId: string, itemId: string, user: User): Promise<Dish>
-  updateItemAmount(
-    dishId: string,
-    itemId: string,
-    newAmount: number,
-    user: User
-  ): Promise<Dish>
-}
-
-export default function ({
-  store,
-  models,
-  dishReader,
-}: {
+export type AnnotatedDish = Dish & { isFavorite?: boolean }
+export type DishController = ReturnType<typeof Factory>
+type IDishController = {
   store: Store
   models: Models
   dishReader: DishReader
-}): DishController {
+}
+
+export default function Factory(dependencies: IDishController) {
+  const { store, models, dishReader } = dependencies
   const { dishAdded, dishModified, itemRemoved, itemAmountUpdated } =
     models.dish.events
   const { addDishToList, removeDishFromList } = models.dishList.events
@@ -45,29 +32,30 @@ export default function ({
     return (user && models.dishList.getById(user.listId || user.id)) || []
   }
 
-  function getSingleDish(dishId: string, user: User) {
-    const favorites = getFavorites(user)
+  function annotate(dish: Dish, favorites: DishList) {
     return {
-      ...models.dish.byId(dishId),
-      isFavorite: favorites.includes(dishId),
+      ...dish,
+      isFavorite: favorites.includes(dish.id),
     }
   }
 
+  function getSingleDish(dishId: string, user: User): AnnotatedDish {
+    const favorites = getFavorites(user)
+    return annotate(models.dish.byId(dishId), favorites)
+  }
+
   return {
-    getAll(user?: User): Dish[] {
+    getAll(user?: User): AnnotatedDish[] {
       const dishes = models.dish.getAll()
       if (user) {
         const favorites = getFavorites(user)
-        return dishes.map(dish => ({
-          ...dish,
-          isFavorite: favorites.includes(dish.id),
-        }))
+        return dishes.map(dish => annotate(dish, favorites))
       } else {
         return dishes
       }
     },
 
-    async addDish(data: ReadableDish, user: User): Promise<Dish> {
+    async addDish(data: WritableDish, user: User) {
       const dishId = randomUUID()
       const dish = {
         id: dishId,
@@ -81,29 +69,19 @@ export default function ({
       if (data.items && data.items.forEach) {
         data.items.forEach(item => dishReader.addItem(dishId, item))
       }
-      return dish
+      return getSingleDish(dishId, user)
     },
 
-    async updateDish(
-      id: string,
-      dish: Partial<Dish>,
-      user: User
-    ): Promise<Dish> {
-      const { name, recipe, source } = dish
+    async updateDish(id: string, dish: Partial<WritableDish>, user: User) {
+      const { name, recipe, source, isFavorite } = dish
       await store.dispatch(
         dishModified(JSON.parse(JSON.stringify({ id, name, recipe, source })))
       )
+      if (isFavorite !== undefined) {
+        const event = isFavorite ? addDishToList : removeDishFromList
+        await store.dispatch(event(id, user.listId || user.id))
+      }
       return getSingleDish(id, user)
-    },
-
-    async setFavorite(
-      user: User,
-      dishId: string,
-      isFavorite: boolean
-    ): Promise<Dish> {
-      const event = isFavorite ? addDishToList : removeDishFromList
-      await store.dispatch(event(dishId, user.listId || user.id))
-      return getSingleDish(dishId, user)
     },
 
     canEdit(user: User, dishId: string): boolean {
@@ -112,20 +90,12 @@ export default function ({
       return dish && (user.isAdmin || isOwner)
     },
 
-    async addItem(
-      dishId: string,
-      item: ReadableItem,
-      user: User
-    ): Promise<Dish> {
+    async addItem(dishId: string, item: ReadableItem, user: User) {
       await dishReader.addItem(dishId, item)
       return getSingleDish(dishId, user)
     },
 
-    async removeItem(
-      dishId: string,
-      itemId: string,
-      user: User
-    ): Promise<Dish> {
+    async removeItem(dishId: string, itemId: string, user: User) {
       await store.dispatch(itemRemoved(dishId, itemId))
       return getSingleDish(dishId, user)
     },
@@ -135,7 +105,7 @@ export default function ({
       itemId: string,
       amount: number,
       user: User
-    ): Promise<Dish> {
+    ) {
       await store.dispatch(itemAmountUpdated(dishId, itemId, amount))
       return getSingleDish(dishId, user)
     },

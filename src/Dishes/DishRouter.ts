@@ -1,10 +1,10 @@
-import express, { NextFunction, Request, Response, Router } from 'express'
-import { MiddleWare } from '../auth/auth'
-import { User } from '../models/user'
-import { DishController } from './DishController'
-import { JSONHandler } from '../MainRouter'
-import { Dish } from '../models/dish'
-import { ReadableItem } from './DishReader'
+import express, { NextFunction, Request, Response, Router } from "express"
+import { MiddleWare } from "../auth/auth"
+import { User } from "../models/user"
+import { DishController } from "./DishController"
+import { JSONHandler } from "../MainRouter"
+import { Dish } from "../models/dish"
+import { ReadableItem } from "./DishReader"
 
 type Auth = { checkJWT: MiddleWare; requireJWT: MiddleWare }
 
@@ -19,17 +19,14 @@ export default function ({
 }): Router {
   const router = express.Router()
   const { checkJWT, requireJWT } = auth
-  const assertOwner = () => (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    if (dishController.canEdit(req.user as User, req.params.id)) {
-      next()
-    } else {
-      res.status(403).json({ error: 'Not allowed to update a foreign dish' })
+  const assertOwner =
+    () => (req: Request, res: Response, next: NextFunction) => {
+      if (dishController.canEdit(req.user as User, req.params.id)) {
+        next()
+      } else {
+        res.status(403).json({ error: "Not allowed to update a foreign dish" })
+      }
     }
-  }
 
   function getAllDishes(req: Request) {
     return { dishes: dishController.getAll(req.user as User) }
@@ -40,15 +37,8 @@ export default function ({
   }
 
   function updateDish(req: Request) {
-    return dishController.updateDish(req.params.id, req.body, req.user as User)
-  }
-
-  function addFavorite(req: Request) {
-    return dishController.setFavorite(req.user as User, req.params.id, true)
-  }
-
-  function removeFavorite(req: Request) {
-    return dishController.setFavorite(req.user as User, req.params.id, false)
+    const user = req.user as User & { isFavorite: boolean }
+    return dishController.updateDish(req.params.id, req.body, user)
   }
 
   function addItem(req: Request): Promise<Dish> {
@@ -76,22 +66,19 @@ export default function ({
     )
   }
 
-  router.get('/', checkJWT(), jsonResult(getAllDishes))
-  router.post('/', requireJWT(), jsonResult(addDish))
-  router.patch('/:id', requireJWT(), assertOwner(), jsonResult(updateDish))
+  router.get("/", checkJWT(), jsonResult(getAllDishes))
+  router.post("/", requireJWT(), jsonResult(addDish))
+  router.patch("/:id", requireJWT(), assertOwner(), jsonResult(updateDish))
 
-  router.post('/:id/favorites', requireJWT(), jsonResult(addFavorite))
-  router.delete('/:id/favorites', requireJWT(), jsonResult(removeFavorite))
-
-  router.post('/:id/items', requireJWT(), assertOwner(), jsonResult(addItem))
+  router.post("/:id/items", requireJWT(), assertOwner(), jsonResult(addItem))
   router.patch(
-    '/:id/items/:itemId',
+    "/:id/items/:itemId",
     requireJWT(),
     assertOwner(),
     jsonResult(updateItem)
   )
   router.delete(
-    '/:id/items/:itemId',
+    "/:id/items/:itemId",
     requireJWT(),
     assertOwner(),
     jsonResult(removeItem)

@@ -134,63 +134,62 @@ describe("DishRouter", () => {
     })
   })
 
-  describe("POST /dishes/:id/favorites", () => {
+  describe("PATCH /dishes/:id", () => {
     it("should not allow to set favorites if not authenticated", async () => {
-      await request(app).post("/4711/favorites").expect(401)
+      await request(app)
+        .patch("/4711")
+        .send({ isFavorite: true })
+        .expect(401)
     })
 
     it("should mark dishes as favorite for authenticated users", async () => {
-      await createPancake()
+      await createPancake({ ownedBy: "007" })
       await request(app)
-        .post("/4711/favorites")
+        .patch("/4711")
         .set("Authorization", "Bearer " + validToken)
+        .send({ isFavorite: true })
         .expect(200)
 
       expect(models.dishList.getById("007")).toEqual(["4711"])
     })
 
     it("should return the dish when it was marked as favorite", async () => {
-      await createPancake()
+      await createPancake({ ownedBy: "007" })
       const result = await request(app)
-        .post("/4711/favorites")
+        .patch("/4711")
         .set("Authorization", "Bearer " + validToken)
+        .send({ isFavorite: true })
         .expect(200)
 
       expect(result.body).toHaveProperty("isFavorite")
       expect(result.body.isFavorite).toBe(true)
     })
-  })
-
-  describe("DELETE /dishes/:id/favorites", () => {
-    it("should not allow to delete favorites if not authenticated", async () => {
-      await request(app).delete("/4711/favorites").expect(401)
-    })
 
     it("should remove favorite mark from dish", async () => {
-      await createPancake()
+      await createPancake({ ownedBy: "007" })
       store.dispatch(models.dishList.events.addDishToList("4711", "007"))
       await request(app)
-        .delete("/4711/favorites")
+        .patch("/4711")
         .set("Authorization", "Bearer " + validToken)
+        .send({ isFavorite: false })
         .expect(200)
 
       expect(models.dishList.getById("007")).toEqual([])
     })
 
     it("should return the dish when the favorite mark was removed", async () => {
-      await createPancake()
+      await createPancake({ ownedBy: "007" })
       store.dispatch(models.dishList.events.addDishToList("4711", "006"))
       const result = await request(app)
-        .delete("/4711/favorites")
+        .patch("/4711")
         .set("Authorization", "Bearer " + validToken)
+        .send({ isFavorite: false })
         .expect(200)
 
       expect(result.body).not.toHaveProperty("error")
       expect(result.body).toHaveProperty("isFavorite", false)
     })
-  })
 
-  describe("PATCH /dishes/:id", () => {
     it("should update the title of a dish", async () => {
       await createPancake({ ownedBy: "007" })
       const result = await request(app)
