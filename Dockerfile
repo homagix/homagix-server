@@ -1,4 +1,4 @@
-FROM node:16-alpine@sha256:2eafdff61134201bb13e452ae5515ac181126d28d91d548b048dab66140adbe6 as builder
+FROM node:16-alpine@sha256:d00dbac92c6cf268fe35427366e1f091d27cd306dd95c65e307b4058bc8bf168 as builder
 WORKDIR /build
 ADD . .
 RUN npm ci && \
@@ -10,7 +10,7 @@ RUN mkdir /app && \
     mv node_modules package.json /app
 
 
-FROM node:16-alpine@sha256:2eafdff61134201bb13e452ae5515ac181126d28d91d548b048dab66140adbe6
+FROM node:16-alpine@sha256:d00dbac92c6cf268fe35427366e1f091d27cd306dd95c65e307b4058bc8bf168
 ENV NODE_ENV production
 WORKDIR /app
 COPY --from=builder /app .
