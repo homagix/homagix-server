@@ -98,7 +98,16 @@ export default function Factory({
   }
 
   function jwtFromRequest(req: Request) {
-    return (req.cookies && req.cookies.token) || req.headers.authorization
+    if (req.cookies && req.cookies.token) {
+      return req.cookies.token
+    }
+    if (req.headers.authorization) {
+      const parts = req.headers.authorization.split(" ")
+      if (parts.length === 2 && parts[0] === "Bearer") {
+        return parts[1]
+      }
+    }
+    return ""
   }
 
   function setPassword(user: AuthUser, newPassword: string): void {
