@@ -40,6 +40,9 @@ function userId(user: Express.User | undefined): string {
   return (user as { id: string })?.id
 }
 
+const createToken = () =>
+  jsonwebtoken.sign({ sub: 4712 }, secretOrKey, { expiresIn: "24h" })
+
 describe("auth", () => {
   function tryMiddleware(
     middleWare: RequestHandler,
@@ -108,9 +111,7 @@ describe("auth", () => {
 
   describe("checkJWT", () => {
     it("should add the user to the request if a valid JWT is found in the header", done => {
-      const authorization = jsonwebtoken.sign({ sub: 4712 }, secretOrKey, {
-        expiresIn: "24h",
-      })
+      const authorization = "Bearer " + createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         headers: { authorization },
@@ -120,9 +121,7 @@ describe("auth", () => {
     })
 
     it("should add the user to the request if a valid JWT is given in cookie", done => {
-      const token = jsonwebtoken.sign({ sub: 4712 }, secretOrKey, {
-        expiresIn: "24h",
-      })
+      const token = createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         cookies: { token },
@@ -134,9 +133,7 @@ describe("auth", () => {
 
   describe("requireJWT", () => {
     it("should authenticate with JWT in header", done => {
-      const authorization = jsonwebtoken.sign({ sub: 4712 }, secretOrKey, {
-        expiresIn: "24h",
-      })
+      const authorization = "Bearer " + createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         headers: { authorization },
@@ -146,9 +143,7 @@ describe("auth", () => {
     })
 
     it("should authenticate with JWT in cookie", done => {
-      const token = jsonwebtoken.sign({ sub: 4712 }, secretOrKey, {
-        expiresIn: "24h",
-      })
+      const token = createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         cookies: { token },
