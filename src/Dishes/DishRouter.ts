@@ -7,6 +7,7 @@ import { Dish } from "../models/dish"
 import { ReadableItem } from "./DishReader"
 
 type Auth = { checkJWT: MiddleWare; requireJWT: MiddleWare }
+type AssertFunc = (req: Request) => void
 
 export default function ({
   auth,
@@ -19,14 +20,50 @@ export default function ({
 }): Router {
   const router = express.Router()
   const { checkJWT, requireJWT } = auth
-  const assertOwner =
-    () => (req: Request, res: Response, next: NextFunction) => {
-      if (dishController.canEdit(req.user as User, req.params.id)) {
+
+  function canEdit(req: Request) {
+    if (!dishController.canEdit(req.user as User, req.params.id)) {
+      throw "Not allowed to update a foreign dish"
+    }
+  }
+
+  function isOnlyFavoriteField(req: Request) {
+    const fieldsToChange = Object.keys(req.body)
+    if (fieldsToChange.length !== 1 || fieldsToChange[0] !== "isFavorite") {
+      throw "Not allowed change fields other than 'isFavorite'"
+    }
+  }
+
+  function assert(func: AssertFunc) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      try {
+        func(req)
         next()
-      } else {
-        res.status(403).json({ error: "Not allowed to update a foreign dish" })
+      } catch (error) {
+        res.status(403).json({ error })
       }
     }
+  }
+
+  function assertOneOf(funcs: AssertFunc[]) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      let lastError = ""
+      if (
+        funcs.some(func => {
+          try {
+            func(req)
+            return true
+          } catch (error) {
+            lastError = error as string
+          }
+        })
+      ) {
+        next()
+      } else {
+        res.status(403).json({ error: lastError })
+      }
+    }
+  }
 
   function getAllDishes(req: Request) {
     return { dishes: dishController.getAll(req.user as User) }
@@ -68,19 +105,24 @@ export default function ({
 
   router.get("/", checkJWT(), jsonResult(getAllDishes))
   router.post("/", requireJWT(), jsonResult(addDish))
-  router.patch("/:id", requireJWT(), assertOwner(), jsonResult(updateDish))
+  router.patch(
+    "/:id",
+    requireJWT(),
+    assertOneOf([canEdit, isOnlyFavoriteField]),
+    jsonResult(updateDish)
+  )
 
-  router.post("/:id/items", requireJWT(), assertOwner(), jsonResult(addItem))
+  router.post("/:id/items", requireJWT(), assert(canEdit), jsonResult(addItem))
   router.patch(
     "/:id/items/:itemId",
     requireJWT(),
-    assertOwner(),
+    assert(canEdit),
     jsonResult(updateItem)
   )
   router.delete(
     "/:id/items/:itemId",
     requireJWT(),
-    assertOwner(),
+    assert(canEdit),
     jsonResult(removeItem)
   )
 
