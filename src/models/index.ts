@@ -1,11 +1,11 @@
-import Dish, { DishModel } from './dish'
-import Ingredient, { IngredientModel } from './ingredient'
-import DishHistory, { HistoryModel } from './dishHistory'
-import DishList, { DishListModel } from './dishList'
-import User, { UserModel } from './user'
-import { Store } from '../EventStore/EventStore'
-import { ModelWriter } from './ModelWriter'
-import { ModelReader } from './ModelReader'
+import Dish, { DishModel } from "./dish"
+import Ingredient, { IngredientModel } from "./ingredient"
+import DishHistory, { HistoryModel } from "./dishHistory"
+import DishList, { DishListModel } from "./dishList"
+import User, { UserModel } from "./user"
+import { Store } from "../EventStore/EventStore"
+import { ModelWriter } from "./ModelWriter"
+import { ModelReader } from "./ModelReader"
 
 export type Models = {
   dish: DishModel
@@ -13,6 +13,13 @@ export type Models = {
   dishHistory: HistoryModel
   dishList: DishListModel
   user: UserModel
+}
+
+export type ModelDependencies = {
+  store: Store
+  models: Models
+  modelWriter: ModelWriter
+  modelReader: ModelReader
 }
 
 export default function ({
@@ -25,12 +32,18 @@ export default function ({
   modelReader: ModelReader
 }): Models {
   const models = {} as Models
+  const dependencies: ModelDependencies = {
+    store,
+    models,
+    modelWriter,
+    modelReader,
+  }
 
-  models.dish = Dish({ store, modelWriter })
-  models.ingredient = Ingredient({ store, models, modelWriter })
-  models.dishHistory = DishHistory({ store, models, modelWriter })
-  models.dishList = DishList({ store, models, modelWriter })
-  models.user = User({ store, modelWriter, modelReader })
+  models.dish = Dish(dependencies)
+  models.ingredient = Ingredient(dependencies)
+  models.dishHistory = DishHistory(dependencies)
+  models.dishList = DishList(dependencies)
+  models.user = User(dependencies)
 
   return models
 }

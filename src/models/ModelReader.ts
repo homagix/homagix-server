@@ -8,7 +8,11 @@ export default function Factory(basePath: string) {
   }
 
   function readYAMLFilesFrom(base: string) {
-    return readdirSync(base).map(name => readYAMLFile(join(base, name)))
+    return readdirSync(base).map(name => {
+      const data = readYAMLFile(join(base, name))
+      data.id = name.replace(/\.yaml$/, "")
+      return data
+    })
   }
 
   return (entityName: string) => readYAMLFilesFrom(join(basePath, entityName))

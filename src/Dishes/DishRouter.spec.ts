@@ -33,6 +33,7 @@ const router = Router({ auth, jsonResult, dishController })
 const app = express()
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+app.use(auth.checkJWT())
 app.use(router)
 
 async function createPancake(options: Partial<Dish> = {}) {

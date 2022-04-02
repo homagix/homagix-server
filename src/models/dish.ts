@@ -1,7 +1,7 @@
+import { ModelDependencies } from "./index"
 import { randomUUID } from "crypto"
 import { assert } from "../EventStore/Events"
-import { Store, Event } from "../EventStore/EventStore"
-import { ModelWriter } from "./ModelWriter"
+import { Event } from "../EventStore/EventStore"
 
 export type DishItem = {
   id: string
@@ -21,15 +21,7 @@ export interface DishEvents {
   served(dishId: string, date: Date, listId: string): Event
 }
 
-export interface DishModel {
-  getAll(): Dish[]
-  byId(id: string): Dish
-  byName(name: string): Dish
-  getStandardIngredients(): DishItem[]
-  events: DishEvents
-  mutators: Record<string, (event: Event) => void>
-  reset(): void
-}
+export type DishModel = ReturnType<typeof DishFactory>
 
 export type Dish = {
   id: string
@@ -67,10 +59,9 @@ export function getStandardIngredients(): DishItem[] {
 }
 
 type DishWriter = (dish: Dish) => void
+type Mutators = Record<string, (event: Event) => void>
 
-export function DishMutators(
-  writer: DishWriter
-): Record<string, (event: Event) => void> {
+export function DishMutators(writer: DishWriter): Mutators {
   return {
     addDish(event: Event): void {
       const fields = [
@@ -200,13 +191,8 @@ export const events: DishEvents = {
   },
 }
 
-export default function ({
-  store,
-  modelWriter,
-}: {
-  store: Store
-  modelWriter: ModelWriter
-}): DishModel {
+export default function DishFactory(dependencies: ModelDependencies) {
+  const { store, modelWriter } = dependencies
   const mutators = DishMutators(modelWriter.writeDish)
 
   store

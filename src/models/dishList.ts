@@ -1,73 +1,53 @@
-import { Models } from '.'
-import { assert } from '../EventStore/Events'
-import { Event, Store } from '../EventStore/EventStore'
-import { ModelWriter } from './ModelWriter'
+import { ModelDependencies } from "./index"
+import { assert } from "../EventStore/Events"
 
 type DishId = string
 type ListId = string
-type WriterFunction = (listId: ListId, dishList: DishList) => void
 
-export type DishList = DishId[]
-
-export type DishListModel = {
-  reset(): void
-  getById(listId: string): DishList
-
-  events: {
-    addDishToList(dishId: string, listId: string): Event
-    removeDishFromList(dishId: string, listId: string): Event
-  }
+export type DishList = {
+  id: ListId
+  dishes: DishId[]
 }
+
+export type DishListModel = ReturnType<typeof DishListFactory>
 
 const lists = {} as Record<ListId, DishList>
 
-function addDish(writer: WriterFunction, event: Event) {
-  const { dishId, listId } = event as { dishId: DishId; listId: ListId }
-  lists[listId] = lists[listId] || []
-  lists[listId].includes(dishId) || lists[listId].push(dishId)
-  writer(listId, lists[listId])
-}
-
-function removeDish(writer: WriterFunction, event: Event) {
-  const { dishId, listId } = event as { dishId: DishId; listId: ListId }
-  lists[listId] = lists[listId].filter(id => id !== dishId)
-  writer(listId, lists[listId])
-}
-
-export default function ({
-  store,
-  models,
-  modelWriter,
-}: {
-  store: Store
-  models: Models
-  modelWriter: ModelWriter
-}): DishListModel {
+export default function DishListFactory(dependencies: ModelDependencies) {
+  const { store, models, modelWriter, modelReader } = dependencies
   const events = {
     addDishToList(dishId: string, listId: string) {
-      assert(dishId, 'no dish id')
-      assert(listId, 'no list id')
-      return { type: 'addDishToList', dishId, listId }
+      assert(dishId, "no dish id")
+      assert(listId, "no list id")
+      return { type: "addDishToList", dishId, listId }
     },
 
     removeDishFromList(dishId: string, listId: string) {
-      assert(dishId, 'no dish id')
-      assert(listId, 'no list id')
-      assert(models.dishList.getById(listId), 'unkown dishList')
-      return { type: 'removeDishFromList', dishId, listId }
+      assert(dishId, "no dish id")
+      assert(listId, "no list id")
+      assert(models.dishList.getById(listId), "unkown dishList")
+      return { type: "removeDishFromList", dishId, listId }
     },
   }
+
   store
-    .on(events.addDishToList, event =>
-      addDish(modelWriter.writeDishlist, event)
-    )
-    .on(events.removeDishFromList, event =>
-      removeDish(modelWriter.writeDishlist, event)
-    )
+    .on(events.addDishToList, event => {
+      const { dishId, listId } = event as { dishId: DishId; listId: ListId }
+      lists[listId] = lists[listId] || { id: listId, dishes: [] }
+      lists[listId].dishes.includes(dishId) || lists[listId].dishes.push(dishId)
+      modelWriter.writeDishlist(lists[listId])
+    })
+    .on(events.removeDishFromList, event => {
+      const { dishId, listId } = event as { dishId: DishId; listId: ListId }
+      lists[listId].dishes = lists[listId].dishes.filter(id => id !== dishId)
+      modelWriter.writeDishlist(lists[listId])
+    })
+
+  modelReader("dishLists").forEach((data: DishList) => (lists[data.id] = data))
 
   return {
     reset: () => Object.assign(lists, {}),
-    getById: listId => lists[listId],
+    getById: (listId: ListId) => lists[listId]?.dishes,
     events,
   }
 }

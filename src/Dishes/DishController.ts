@@ -1,4 +1,3 @@
-import { DishList } from "./../models/dishList"
 import { randomUUID } from "crypto"
 import { Store } from "../EventStore/EventStore"
 import { Models } from "../models"
@@ -32,7 +31,7 @@ export default function Factory(dependencies: IDishController) {
     return (user && models.dishList.getById(user.listId || user.id)) || []
   }
 
-  function annotate(dish: Dish, favorites: DishList) {
+  function annotate(dish: Dish, favorites: string[]) {
     return {
       ...dish,
       isFavorite: favorites.includes(dish.id),
