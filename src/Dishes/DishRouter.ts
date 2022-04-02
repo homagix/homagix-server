@@ -6,7 +6,7 @@ import { JSONHandler } from "../MainRouter"
 import { Dish } from "../models/dish"
 import { ReadableItem } from "./DishReader"
 
-type Auth = { checkJWT: MiddleWare; requireJWT: MiddleWare }
+type Auth = { requireJWT: MiddleWare }
 type AssertFunc = (req: Request) => void
 
 export default function ({
@@ -19,7 +19,7 @@ export default function ({
   dishController: DishController
 }): Router {
   const router = express.Router()
-  const { checkJWT, requireJWT } = auth
+  const { requireJWT } = auth
 
   function canEdit(req: Request) {
     if (!dishController.canEdit(req.user as User, req.params.id)) {
@@ -103,7 +103,7 @@ export default function ({
     )
   }
 
-  router.get("/", checkJWT(), jsonResult(getAllDishes))
+  router.get("/", jsonResult(getAllDishes))
   router.post("/", requireJWT(), jsonResult(addDish))
   router.patch(
     "/:id",

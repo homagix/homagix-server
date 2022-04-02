@@ -43,9 +43,12 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use(auth.checkJWT())
+
 app.use((req, res, next) => {
-  logger.debug(req.method + " " + req.path)
   next()
+  const user = (req.user && (req.user as { id: string }).id) || ""
+  logger.debug(`${res.statusCode} ${req.method} ${req.path} ${user}`)
 })
 
 app.use("/", router)
