@@ -1,6 +1,5 @@
 import request from "supertest"
 import express, { NextFunction, Request, Response } from "express"
-import bodyParser from "body-parser"
 import SessionRouter from "./SessionRouter"
 
 const app = express()
@@ -45,8 +44,8 @@ const auth = {
   },
 }
 
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
 const router = SessionRouter({ auth })
 app.use("/session", router)
 

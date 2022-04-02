@@ -1,7 +1,6 @@
 import expect from "expect"
 import express, { Request, Response } from "express"
 import request from "supertest"
-import bodyParser from "body-parser"
 import Controller from "./DishController"
 import Router from "./DishRouter"
 import DishReader from "./DishReader"
@@ -32,8 +31,8 @@ const dishReader = DishReader({ store, models })
 const dishController = Controller({ store, models, dishReader })
 const router = Router({ auth, jsonResult, dishController })
 const app = express()
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
 app.use(router)
 
 async function createPancake(options: Partial<Dish> = {}) {
@@ -136,10 +135,7 @@ describe("DishRouter", () => {
 
   describe("PATCH /dishes/:id", () => {
     it("should not allow to set favorites if not authenticated", async () => {
-      await request(app)
-        .patch("/4711")
-        .send({ isFavorite: true })
-        .expect(401)
+      await request(app).patch("/4711").send({ isFavorite: true }).expect(401)
     })
 
     it("should mark dishes as favorite for authenticated users", async () => {
