@@ -1,4 +1,11 @@
-import express, { Request, RequestHandler, Response, Router } from "express"
+import { HTTPError } from "./lib/HTTPError"
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+  Router,
+} from "express"
 import SessionRouter from "./auth/SessionRouter"
 import AccountRouter from "./auth/AccountRouter"
 import DishProposer from "./Weekplan/DishProposer"
@@ -22,13 +29,17 @@ export type JSONHandler = (func: RouteHandler) => RequestHandler
 
 export function jsonResult(func: RouteHandler): RequestHandler {
   const fn = {
-    async [func.name](req: Request, res: Response) {
+    async [func.name](req: Request, res: Response, next: NextFunction) {
       try {
         const result = await func(req)
         res.json(result)
       } catch (error) {
         console.error(error)
-        res.status(500).json({ error })
+        const result =
+          error instanceof HTTPError
+            ? error
+            : new HTTPError(500, (error as Error).message)
+        next(result)
       }
     },
   }

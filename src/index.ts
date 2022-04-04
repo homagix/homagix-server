@@ -1,3 +1,4 @@
+import { HTTPError } from "./lib/HTTPError"
 import path from "path"
 import express, { NextFunction, Request, Response } from "express"
 import cookieParser from "cookie-parser"
@@ -46,22 +47,25 @@ app.use((req, res, next) => {
 app.use(auth.checkJWT())
 
 app.use((req, res, next) => {
-  next()
   const user = (req.user && (req.user as { id: string }).id) || ""
-  logger.debug(`${res.statusCode} ${req.method} ${req.path} ${user}`)
+  logger.debug(`${req.method} ${req.originalUrl} ${user}`)
+  next()
 })
 
 app.use("/", router)
 app.use("/images", express.static(path.join(dataDir, "images")))
 
+app.use("/", (req: Request, res: Response, next: NextFunction) =>
+  next(new HTTPError(404, "Not found"))
+)
+
 app.use(function (
-  err: { code?: number; message?: string },
+  err: HTTPError,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) {
-  logger.error(err)
   res.status(err.code || 500).json({ error: err.message || err.toString() })
 })
 
