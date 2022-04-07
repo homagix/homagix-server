@@ -29,7 +29,7 @@ const jsonResult =
     res.json(await func(req))
 const dishReader = DishReader({ store, models })
 const dishController = Controller({ store, models, dishReader })
-const router = Router({ auth, jsonResult, dishController })
+const router = Router({ jsonResult, dishController })
 const app = express()
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())

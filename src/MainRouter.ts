@@ -26,6 +26,7 @@ const mailer = Mailer({ nodeMailer })
 
 export type RouteHandler = (req: Request) => unknown | Promise<unknown>
 export type JSONHandler = (func: RouteHandler) => RequestHandler
+export type AssertFunc = (req: Request) => HTTPError | undefined
 
 export function jsonResult(func: RouteHandler): RequestHandler {
   const fn = {
@@ -46,6 +47,27 @@ export function jsonResult(func: RouteHandler): RequestHandler {
   return fn[func.name]
 }
 
+export function isLoggedIn(req: Request) {
+  if (!req.user) {
+    return new HTTPError(401, "You need to be logged in")
+  }
+}
+
+export function assert(func: AssertFunc) {
+  return assertOneOf([func])
+}
+
+export function assertOneOf(funcs: AssertFunc[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const errors = funcs.map(func => func(req)).filter(e => e)
+    if (errors.length === funcs.length) {
+      res.status(errors[errors.length - 1]?.code || 500).json({ error: errors })
+    } else {
+      next()
+    }
+  }
+}
+
 export default function ({
   models,
   store,
@@ -61,7 +83,7 @@ export default function ({
   const proposer = DishProposer({ models })
   const dishReader = DishReader({ store, models })
   const dishController = DishController({ store, models, dishReader })
-  const dishRouter = DishRouter({ jsonResult, auth, dishController })
+  const dishRouter = DishRouter({ jsonResult, dishController })
   const ingredientRouter = IngredientRouter({
     controller: IngredientController({ models, store }),
     jsonResult,

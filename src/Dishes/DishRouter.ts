@@ -1,67 +1,32 @@
-import express, { NextFunction, Request, Response, Router } from "express"
-import { MiddleWare } from "../auth/auth"
+import express, { Request } from "express"
+import { HTTPError } from "./../lib/HTTPError"
 import { User } from "../models/user"
 import { DishController } from "./DishController"
-import { JSONHandler } from "../MainRouter"
+import { assert, assertOneOf, isLoggedIn, JSONHandler } from "../MainRouter"
 import { Dish } from "../models/dish"
 import { ReadableItem } from "./DishReader"
 
-type Auth = { requireJWT: MiddleWare }
-type AssertFunc = (req: Request) => void
-
-export default function ({
-  auth,
-  jsonResult,
-  dishController,
-}: {
-  auth: Auth
+type Dependencies = {
   jsonResult: JSONHandler
   dishController: DishController
-}): Router {
+}
+
+export default function ({ jsonResult, dishController }: Dependencies) {
   const router = express.Router()
-  const { requireJWT } = auth
 
   function canEdit(req: Request) {
     if (!dishController.canEdit(req.user as User, req.params.id)) {
-      throw "Not allowed to update a foreign dish"
+      return new HTTPError(403, "Not allowed to update a foreign dish")
     }
   }
 
   function isOnlyFavoriteField(req: Request) {
     const fieldsToChange = Object.keys(req.body)
     if (fieldsToChange.length !== 1 || fieldsToChange[0] !== "isFavorite") {
-      throw "Not allowed change fields other than 'isFavorite'"
-    }
-  }
-
-  function assert(func: AssertFunc) {
-    return (req: Request, res: Response, next: NextFunction) => {
-      try {
-        func(req)
-        next()
-      } catch (error) {
-        res.status(403).json({ error })
-      }
-    }
-  }
-
-  function assertOneOf(funcs: AssertFunc[]) {
-    return (req: Request, res: Response, next: NextFunction) => {
-      let lastError = ""
-      if (
-        funcs.some(func => {
-          try {
-            func(req)
-            return true
-          } catch (error) {
-            lastError = error as string
-          }
-        })
-      ) {
-        next()
-      } else {
-        res.status(403).json({ error: lastError })
-      }
+      return new HTTPError(
+        403,
+        "Not allowed change fields other than 'isFavorite'"
+      )
     }
   }
 
@@ -104,24 +69,29 @@ export default function ({
   }
 
   router.get("/", jsonResult(getAllDishes))
-  router.post("/", requireJWT(), jsonResult(addDish))
+  router.post("/", assert(isLoggedIn), jsonResult(addDish))
   router.patch(
     "/:id",
-    requireJWT(),
+    assert(isLoggedIn),
     assertOneOf([canEdit, isOnlyFavoriteField]),
     jsonResult(updateDish)
   )
 
-  router.post("/:id/items", requireJWT(), assert(canEdit), jsonResult(addItem))
+  router.post(
+    "/:id/items",
+    assert(isLoggedIn),
+    assert(canEdit),
+    jsonResult(addItem)
+  )
   router.patch(
     "/:id/items/:itemId",
-    requireJWT(),
+    assert(isLoggedIn),
     assert(canEdit),
     jsonResult(updateItem)
   )
   router.delete(
     "/:id/items/:itemId",
-    requireJWT(),
+    assert(isLoggedIn),
     assert(canEdit),
     jsonResult(removeItem)
   )
