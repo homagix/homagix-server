@@ -40,6 +40,8 @@ export default function ModelWriterFactory(basePath: string): ModelWriter {
   return {
     writeDish(dish: Dish): void {
       const data = Object.assign({}, dish, {
+        id: undefined,
+        recipe: dish.recipe && dish.recipe.replace(/(^\n)$/, "$1\n"),
         items:
           dish.items &&
           dish.items.map(ingredient => {
@@ -50,7 +52,8 @@ export default function ModelWriterFactory(basePath: string): ModelWriter {
             return `${ingredient.amount} ${item.unit} ${item.name}`
           }),
       })
-      dishesWriter(dish.id as string, { ...data, id: undefined })
+      delete data["id"]
+      dishesWriter(dish.id as string, data)
     },
 
     writeIngredient: (ingredient: Ingredient) =>

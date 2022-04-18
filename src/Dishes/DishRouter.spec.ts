@@ -79,7 +79,13 @@ describe("DishRouter", () => {
         .expect(200)
 
       expect(result.body.dishes).toEqual([
-        { id: "4711", name: "Pancake", items: [], isFavorite: true },
+        {
+          id: "4711",
+          name: "Pancake",
+          items: [],
+          isFavorite: true,
+          isEditable: false,
+        },
       ])
     })
 

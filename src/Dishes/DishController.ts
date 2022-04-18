@@ -13,7 +13,10 @@ type WritableDish = {
   isFavorite?: boolean
 }
 
-export type AnnotatedDish = Dish & { isFavorite?: boolean }
+export type AnnotatedDish = Dish & {
+  isFavorite?: boolean
+  isEditable?: boolean
+}
 export type DishController = ReturnType<typeof Factory>
 type IDishController = {
   store: Store
@@ -31,24 +34,30 @@ export default function Factory(dependencies: IDishController) {
     return (user && models.dishList.getById(user.listId || user.id)) || []
   }
 
-  function annotate(dish: Dish, favorites: string[]) {
+  function annotate(dish: Dish, user: User) {
+    const favorites = getFavorites(user)
     return {
       ...dish,
       isFavorite: favorites.includes(dish.id),
+      isEditable: canEdit(user, dish.id),
     }
   }
 
   function getSingleDish(dishId: string, user: User): AnnotatedDish {
-    const favorites = getFavorites(user)
-    return annotate(models.dish.byId(dishId), favorites)
+    return annotate(models.dish.byId(dishId), user)
+  }
+
+  function canEdit(user: User, dishId: string): boolean {
+    const dish = models.dish.byId(dishId)
+    const isOwner = [user.listId, user.id].includes(dish.ownedBy)
+    return dish && (user.isAdmin || isOwner)
   }
 
   return {
     getAll(user?: User): AnnotatedDish[] {
       const dishes = models.dish.getAll()
       if (user) {
-        const favorites = getFavorites(user)
-        return dishes.map(dish => annotate(dish, favorites))
+        return dishes.map(dish => annotate(dish, user))
       } else {
         return dishes
       }
@@ -83,11 +92,7 @@ export default function Factory(dependencies: IDishController) {
       return getSingleDish(id, user)
     },
 
-    canEdit(user: User, dishId: string): boolean {
-      const dish = models.dish.byId(dishId)
-      const isOwner = [user.listId, user.id].includes(dish.ownedBy)
-      return dish && (user.isAdmin || isOwner)
-    },
+    canEdit,
 
     async addItem(dishId: string, item: ReadableItem, user: User) {
       await dishReader.addItem(dishId, item)
