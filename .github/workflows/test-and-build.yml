@@ -63,6 +63,6 @@ jobs:
           labels: ${{ steps.docker_meta.outputs.labels }}
 
       - name: Webhook
-        uses: joelwmale/webhook-action@46fc449696e091ec8c9dbd2a9f7d87508c5d3905
+        uses: joelwmale/webhook-action@dfd3790e94a636fecb78ecf7bdcb935eaa6fda96
         with:
           url: ${{ secrets.UPDATE_WEBHOOK }}
