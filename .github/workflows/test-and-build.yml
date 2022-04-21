@@ -1,5 +1,5 @@
 ---
-name: CI / CD for joschi64/homagix-server
+name: CI / CD for homagix/homagix-server
 on:
   push:
     tags:
