@@ -27,7 +27,7 @@
     "nodemailer": "6.8.0",
     "passport": "0.6.0",
     "passport-jwt": "4.0.0",
-    "yaml": "2.1.1"
+    "yaml": "2.1.2"
   },
   "devDependencies": {
     "@jest/types": "29.1.2",
