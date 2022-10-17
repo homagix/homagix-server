@@ -42,7 +42,7 @@
     "@types/passport": "1.0.11",
     "@types/passport-jwt": "3.0.7",
     "@types/supertest": "2.0.12",
-    "@typescript-eslint/eslint-plugin": "5.40.0",
+    "@typescript-eslint/eslint-plugin": "5.40.1",
     "esbuild": "0.15.11",
     "eslint": "8.25.0",
     "eslint-config-prettier": "8.5.0",
