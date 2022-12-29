@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   homagix-server:
-    image: joschi64/homagix-server@sha256:8be89d0b8baa276197e3d28e77dfd864f106271560e3c9e24f90d50ff81b979e
+    image: joschi64/homagix-server@sha256:ec92aa81936766a3a4194500d3a77a79fc97d8fe695ed84d2dae149c59e078aa
     volumes:
       - /var/apps/homagix-server:/app/data/
     ports:
