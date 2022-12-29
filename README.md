@@ -37,9 +37,10 @@ Dishes are stored in a `/data/dishes` folder using YAML format. This looks like 
       anbraten. Mit Salz und Pfeffer abschmecken. Restlichen Honig, Senf, Öl, 5 EL
       Wasser und etwas Essig in einer Salatschüssel zu einem Dressing mischen.
       Rucola und Linsen dazu geben und mit Salz und Pfeffer abschmecken.
-    image: IMG_4055.jpg
+    images:
+      - IMG_4055.jpg
 
-The image must be placed in `/data/images`.
+The images must be placed in `/data/images`.
 
 Make sure that you use the correct format `amount unit name` for each ingredient and use only the units
 defined in [/server/models/units.js](./blob/master/server/models/units.js)

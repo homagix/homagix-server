@@ -30,7 +30,7 @@ export type Dish = {
   alwaysOnList?: boolean
   items: DishItem[]
   recipe?: string
-  image?: string
+  images?: string[]
   ownedBy?: string
   last?: Date
 }
@@ -71,7 +71,7 @@ export function DishMutators(writer: DishWriter): Mutators {
         "alwaysOnList",
         "items",
         "recipe",
-        "image",
+        "images",
         "ownedBy",
       ]
       const dish = Object.assign({}, ...fields.map(f => ({ [f]: event[f] })))
