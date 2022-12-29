@@ -1,6 +1,6 @@
 {
   "name": "homagix-server",
-  "version": "5.5.1",
+  "version": "6.0.0",
   "description": "Homagix is a tool to plan a week's dishes and shopping lists. This is the server part. See https://github.com/jschirrmacher/homagix-frontend fir the frontend",
   "scripts": {
     "dev": "ts-node -r dotenv-flow/config src",
