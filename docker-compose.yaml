@@ -7,9 +7,9 @@ services:
     ports:
       - 8200:8200
     environment:
-      - BASEURL=https://homagix-server.dilab.co
+      - BASEURL=https://homagix-server.justso.de
       - SECRET=my-extremely-confidential-SECRET
-      - MAIL_FROM=homagix@dilab.co
+      - MAIL_FROM=homagix@justso.de
       - SMTP_HOST=smtp.ethereal.email
       - SMTP_PORT=587
       - SMTP_USER=

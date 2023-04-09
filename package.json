@@ -1,14 +1,18 @@
 {
   "name": "homagix-server",
   "version": "6.0.0",
-  "description": "Homagix is a tool to plan a week's dishes and shopping lists. This is the server part. See https://github.com/jschirrmacher/homagix-frontend fir the frontend",
+  "description": "Homagix is a tool to plan a week's dishes and shopping lists. This is the server part. See https://github.com/homagix/homagix-frontend for the frontend",
   "scripts": {
     "dev": "ts-node -r dotenv-flow/config src",
-    "test": "jest",
     "lint": "eslint src/**/*.ts",
     "lint:types": "tsc",
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "jest",
+    "test:coverage": "npm run test:unit -- --coverage",
     "build": "esbuild --bundle --platform=node --sourcemap ./src --outfile=build/server.js",
-    "docker:build": "docker build -t homagix-server .",
+    "docker:build": "docker build -t homagix-server:latest .",
+    "docker:publish": "docker push homagix-server:latest",
+    "update": "npx -y npm-check-updates -d -u -e 2",
     "start": "NOD_ENV=production node -r dotenv-flow/config build/server.js"
   },
   "author": "Joachim Schirrmacher <joachim@dilab.co>",

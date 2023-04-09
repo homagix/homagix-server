@@ -8,7 +8,7 @@ To do this in a more digital way, we created this repository to remember dishes,
 
 ## Program parts
 
-This is the server part of Homagix. It is most likely that you want to clone [the frontend part](https://github.com/jschirrmacher/homagix-frontend) as well.
+This is the server part of Homagix. It is most likely that you want to clone [the frontend part](https://github.com/homagix/homagix-frontend) as well.
 
 ## Adding recipes
 
@@ -49,7 +49,7 @@ You need to restart the server when you add a new dish or make changes to an exi
 
 ## Install and run
 
-    git clone https://github.com/jschirrmacher/homagix-server.git
+    git clone https://github.com/homagix/homagix-server.git
     npm install --production
     # Add some dishes (as described above) in `/data/dishes`.
     npm start

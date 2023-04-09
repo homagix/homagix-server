@@ -9,6 +9,7 @@
   "golang": {
     "enabled": false
   },
+  "schedule": ["every weekend"],
   "packageRules": [
     {
       "matchPackagePatterns": ["^husky$"],
