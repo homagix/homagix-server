@@ -19,8 +19,8 @@
   "author": "Joachim Schirrmacher <joachim@dilab.co>",
   "license": "MIT",
   "engine": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
