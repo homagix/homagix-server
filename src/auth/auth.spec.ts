@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest"
 import jsonwebtoken from "jsonwebtoken"
 import AuthFactory, { AuthUser } from "./auth"
 import Store from "../EventStore/Store.mock"
@@ -15,7 +16,7 @@ const users = [
     firstName: "Test",
     email: "test@example.com",
     access_code: "test-access-1",
-    password: "$2a$10$5cblct/kPaZQ5uh9jNKIVu8.oGiOPDPGB4iZRdNp0E1miYl6jTqXm",
+    password: "$2a$10$5cblct/kPaZQ5uh9jNKIVu8.oGiOPDPGB4iZRdNp0E1miYl6jTqXm"
   },
   { id: "4712", firstName: "Test2", email: "test2@example.com" },
   {
@@ -24,8 +25,8 @@ const users = [
     email: "test3@example.com",
     access_code: "test-access",
     hash: "test-hash",
-    isAdmin: true,
-  },
+    isAdmin: true
+  }
 ]
 users.forEach(user => store.dispatch(models.user.events.userAdded(user)))
 
@@ -48,144 +49,151 @@ describe("auth", () => {
     middleWare: RequestHandler,
     req: Request,
     res: Response,
-    expectedUserId: string,
-    done: jest.DoneCallback
+    expectedUserId: string
   ) {
-    middleWare(req, res, (err: unknown) => {
-      expect(err).toBeUndefined()
-      expect(userId(req.user)).toBe(expectedUserId)
-      done()
+    return new Promise(resolve => {
+      middleWare(req, res, (err: unknown) => {
+        expect(err).toBeUndefined()
+        expect(userId(req.user)).toBe(expectedUserId)
+        resolve()
+      })
     })
   }
 
   describe("requireLogin", () => {
-    it("should authenticate with e-mail and password", done => {
+    it("should authenticate with e-mail and password", async () => {
       const req = mockRequest({
         body: { email: "test@example.com", password: "test-pwd" },
-        user: undefined as User | undefined,
+        user: undefined as User | undefined
       })
-      tryMiddleware(auth.requireLogin(), req, mockResponse(), "4711", done)
+      await tryMiddleware(auth.requireLogin(), req, mockResponse(), "4711")
     })
 
-    it("should generate a JWT if authenticated with e-mail and password", done => {
+    it("should generate a JWT if authenticated with e-mail and password", async () => {
       const middleware = auth.requireLogin()
       const req = mockRequest({
-        body: { email: "test@example.com", password: "test-pwd" },
+        body: { email: "test@example.com", password: "test-pwd" }
       })
       const res = mockResponse()
-      middleware(req, res, () => {
-        expect(res.cookie.calledOnce).toBe(true)
-        expect(res.cookie.args[0][1]).not.toBe("")
-        expect(res.cookie.args[0][1]).not.toBeUndefined()
-        jsonwebtoken.verify(
-          res.cookie.args[0][1],
-          secretOrKey,
-          (err: unknown, decoded) => {
-            expect(err).toBeNull()
-            expect(decoded).toHaveProperty("iat")
-            expect(decoded).toHaveProperty("exp")
-            done()
-          }
-        )
+      await new Promise(resolve => {
+        middleware(req, res, () => {
+          expect(res.cookie.calledOnce).toBe(true)
+          expect(res.cookie.args[0][1]).not.toBe("")
+          expect(res.cookie.args[0][1]).not.toBeUndefined()
+          jsonwebtoken.verify(
+            res.cookie.args[0][1],
+            secretOrKey,
+            (err: unknown, decoded) => {
+              expect(err).toBeNull()
+              expect(decoded).toHaveProperty("iat")
+              expect(decoded).toHaveProperty("exp")
+              resolve()
+            }
+          )
+        })
       })
     })
 
-    it("should not authenticate with e-mail and wrong password", done => {
+    it("should not authenticate with e-mail and wrong password", async () => {
       const middleware = auth.requireLogin()
       const req = mockRequest({
-        body: { email: "test@example.com", password: "wrong-pwd" },
+        body: { email: "test@example.com", password: "wrong-pwd" }
       })
       const res = mockResponse()
       middleware(req, res, () => {
         expect(true).toBe(false)
       })
-      setTimeout(() => {
-        expect(res.status.callCount).toBe(1)
-        expect(res.status.args[0][0]).toBe(401)
-        expect(res.json.callCount).toBe(1)
-        expect(res.json.args[0][0]).toEqual({ error: "Not authenticated" })
-        done()
-      }, 100)
+      await new Promise(resolve =>
+        setTimeout(() => {
+          expect(res.status.callCount).toBe(1)
+          expect(res.status.args[0][0]).toBe(401)
+          expect(res.json.callCount).toBe(1)
+          expect(res.json.args[0][0]).toEqual({ error: "Not authenticated" })
+          resolve()
+        }, 100)
+      )
     })
   })
 
   describe("checkJWT", () => {
-    it("should add the user to the request if a valid JWT is found in the header", done => {
+    it("should add the user to the request if a valid JWT is found in the header", async () => {
       const authorization = "Bearer " + createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         headers: { authorization },
-        user: undefined as User | undefined,
+        user: undefined as User | undefined
       })
-      tryMiddleware(auth.checkJWT(), req, mockResponse(), "4712", done)
+      await tryMiddleware(auth.checkJWT(), req, mockResponse(), "4712")
     })
 
-    it("should add the user to the request if a valid JWT is given in cookie", done => {
+    it("should add the user to the request if a valid JWT is given in cookie", async () => {
       const token = createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         cookies: { token },
-        user: undefined as User | undefined,
+        user: undefined as User | undefined
       })
-      tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712", done)
+      await tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712")
     })
   })
 
   describe("requireJWT", () => {
-    it("should authenticate with JWT in header", done => {
+    it("should authenticate with JWT in header", async () => {
       const authorization = "Bearer " + createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         headers: { authorization },
-        user: undefined as User | undefined,
+        user: undefined as User | undefined
       })
-      tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712", done)
+      await tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712")
     })
 
-    it("should authenticate with JWT in cookie", done => {
+    it("should authenticate with JWT in cookie", async () => {
       const token = createToken()
       const req = mockRequest({
         body: { email: "test3@example.com" },
         cookies: { token },
-        user: undefined as User | undefined,
+        user: undefined as User | undefined
       })
-      tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712", done)
+      await tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712")
     })
   })
 
   describe("requireAdmin", () => {
-    it("should require a user to be admin", done => {
+    it("should require a user to be admin", async () => {
       models.user.adminIsDefined = true
       const middleware = auth.requireAdmin()
       const req = mockRequest({ user: { id: 4711 } })
       const res = mockResponse({ status: 403, message: "Not allowed" })
-      middleware(req, res, (err: unknown) => {
-        expect(err).toEqual({ status: 403, message: "Not allowed" })
-        done()
-      })
+      await new Promise(resolve =>
+        middleware(req, res, (err: unknown) => {
+          expect(err).toEqual({ status: 403, message: "Not allowed" })
+          resolve()
+        })
+      )
     })
 
-    it("should allow access for admins", done => {
+    it("should allow access for admins", async () => {
       models.user.adminIsDefined = true
       const middleware = auth.requireAdmin()
       const req = mockRequest({ user: { id: 4712, isAdmin: true } })
       const res = mockResponse()
-      middleware(req, res, (err: unknown) => {
+      await new Promise(resolve => middleware(req, res, (err: unknown) => {
         expect(err).toBeUndefined()
-        done()
-      })
+        resolve()
+      }))
     })
 
-    it("should allow access if no admin is defined", done => {
+    it("should allow access if no admin is defined", async () => {
       models.user.adminIsDefined = false
       const middleware = auth.requireAdmin()
       const req = mockRequest({ user: { id: 4711 } })
       const res = mockResponse()
-      middleware(req, res, (err: unknown) => {
+      await new Promise(resolve => middleware(req, res, (err: unknown) => {
         expect(err).toBeUndefined()
         models.user.adminIsDefined = true
-        done()
-      })
+        resolve()
+      }))
     })
   })
 

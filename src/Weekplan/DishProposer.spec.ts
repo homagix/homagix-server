@@ -1,4 +1,4 @@
-import expect from "expect"
+import { describe, expect, it } from "vitest"
 import { Models } from "../models"
 import { User } from "../models/user"
 import DishProposer from "./DishProposer"

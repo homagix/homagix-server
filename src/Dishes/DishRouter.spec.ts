@@ -1,4 +1,4 @@
-import expect from "expect"
+import { beforeEach, describe, expect, it } from "vitest"
 import express, { Request, Response } from "express"
 import request from "supertest"
 import Controller from "./DishController"

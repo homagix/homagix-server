@@ -1,4 +1,4 @@
-import expect from "expect"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import fs from "fs"
 import path from "path"
 import DishReader from "./DishReader"

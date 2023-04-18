@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest"
 import { parse, stringify } from "yaml"
 
 const dish1 = `id: 777

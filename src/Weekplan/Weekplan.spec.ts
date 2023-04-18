@@ -1,4 +1,4 @@
-import expect from "expect"
+import { describe, expect, it } from "vitest"
 import { Models } from "../models"
 import { Dish } from "../models/dish"
 import { DishProposer } from "./DishProposer"
@@ -11,7 +11,7 @@ const dishes = {
   a: { id: "a" } as Dish,
   b: { id: "b" } as Dish,
   c: { id: "c" } as Dish,
-  d: { id: "d" } as Dish,
+  d: { id: "d" } as Dish
 }
 const history = [
   ["2020-12-14", "d"],
@@ -22,29 +22,29 @@ const history = [
   ["2020-12-19", "c"],
   ["2020-12-21", "a"],
   ["2020-12-20", "b"],
-  ["2020-12-27", "d"],
+  ["2020-12-27", "d"]
 ]
 
 const dishLists = {
-  7: ["a", "b", "c", "d"],
+  7: ["a", "b", "c", "d"]
 }
 
 const user = { id: "7", firstName: "Luigi", email: "luigi@example.com" }
 
 const models = {
   dishHistory: {
-    getFrom: (user, date) => history.filter(([d]) => d >= date),
+    getFrom: (user, date) => history.filter(([d]) => d >= date)
   },
   dish: {
-    byId: id => dishes[id],
+    byId: id => dishes[id]
   },
-  dishList: { getById: listId => dishLists[listId] },
+  dishList: { getById: listId => dishLists[listId] }
 } as Models
 
 const proposer = {
   get(): Dish[] {
     return [dishes.d, dishes.c, dishes.b]
-  },
+  }
 } as DishProposer
 
 const controller = WeekplanController({ models, proposer, store })
@@ -72,7 +72,7 @@ describe("WeekplanController.getWeekplan", () => {
       "2020-12-23",
       "2020-12-24",
       "2020-12-25",
-      "2020-12-26",
+      "2020-12-26"
     ])
   })
 
@@ -106,7 +106,7 @@ describe("WeekplanController.getWeekplan", () => {
       { date: "2020-12-23", dishId: undefined },
       { date: "2020-12-24", dishId: "d" },
       { date: "2020-12-25", dishId: "c" },
-      { date: "2020-12-26", dishId: "b" },
+      { date: "2020-12-26", dishId: "b" }
     ])
   })
 
@@ -122,7 +122,7 @@ describe("WeekplanController.getWeekplan", () => {
       "2020-12-25",
       "2020-12-26",
       "2020-12-27",
-      "2020-12-28",
+      "2020-12-28"
     ])
   })
 })

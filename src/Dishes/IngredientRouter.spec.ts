@@ -1,4 +1,4 @@
-import expect from "expect"
+import { beforeAll, describe, expect, it } from "vitest"
 import express, { Request, Response } from "express"
 import request from "supertest"
 import Router from "./IngredientRouter"

@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import EventStore, { Store } from "./EventStore"
 import logger from "../lib/MockLogger"
 
