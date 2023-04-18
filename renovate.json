@@ -9,7 +9,7 @@
   "golang": {
     "enabled": false
   },
-  "schedule": ["every weekend"],
+  "schedule": ["at 5:00 pm on Saturday"],
   "packageRules": [
     {
       "matchPackagePatterns": ["^husky$"],
@@ -24,6 +24,13 @@
       "datasources": ["docker"],
       "packageNames": ["node"],
       "allowedVersions": "!/^17\\./"
+    },
+    {
+      "groupName": "vite",
+      "matchPackagePrefixes": [
+        "vite",
+        "^@vitejs/"
+      ]
     }
   ]
 }
