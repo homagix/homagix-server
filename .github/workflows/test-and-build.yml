@@ -62,7 +62,10 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
 
-      - name: Webhook
-        uses: joelwmale/webhook-action@c9072d53a3c58619a7807ab49682d6cca61416e2
-        with:
+      - name: Call deployment webhook if it exists
+        env:
           url: ${{ secrets.UPDATE_WEBHOOK }}
+        if: ${{ env.url != '' }}
+        run: |
+          sed s/https/http/ <<< $url
+          curl -X POST $url
