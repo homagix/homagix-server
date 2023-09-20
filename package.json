@@ -16,7 +16,7 @@
     "update": "npx -y npm-check-updates -d -u -e 2",
     "start": "NOD_ENV=production node -r dotenv-flow/config build/server.js"
   },
-  "author": "Joachim Schirrmacher <joachim@dilab.co>",
+  "author": "Joachim Schirrmacher <joachim@justso.de>",
   "license": "MIT",
   "engine": {
     "node": ">=18.0.0",
