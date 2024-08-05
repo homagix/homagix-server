@@ -34,7 +34,9 @@ export default function DishListFactory(dependencies: ModelDependencies) {
     .on(events.addDishToList, event => {
       const { dishId, listId } = event as { dishId: DishId; listId: ListId }
       lists[listId] = lists[listId] || { id: listId, dishes: [] }
-      lists[listId].dishes.includes(dishId) || lists[listId].dishes.push(dishId)
+      if (!lists[listId].dishes.includes(dishId)) {
+        lists[listId].dishes.push(dishId)
+      }
       modelWriter.writeDishlist(lists[listId])
     })
     .on(events.removeDishFromList, event => {

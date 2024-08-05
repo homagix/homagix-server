@@ -28,7 +28,7 @@ export default function Factory({
       assert(user.id, "No id")
       assert(
         !user.email || user.email.match(/.+@.+\..+/),
-        "email has wrong format"
+        "email has wrong format",
       )
       return { type: "userAdded", user }
     },
@@ -42,7 +42,7 @@ export default function Factory({
       assert(id, "No id")
       assert(
         !user.email || user.email.match(/.+@.+\..+/),
-        "email has wrong format"
+        "email has wrong format",
       )
       return { type: "userChanged", id, user }
     },
@@ -77,7 +77,9 @@ export default function Factory({
 
   store.on(events.userRemoved, (event: Event) => {
     const { id } = event as { id: string }
-    users[id].email && delete byEmail[users[id].email as string]
+    if (users[id].email) {
+      delete byEmail[users[id].email as string]
+    }
     delete users[id]
     modelWriter.removeUser(id)
   })

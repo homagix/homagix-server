@@ -16,7 +16,7 @@ const users = [
     firstName: "Test",
     email: "test@example.com",
     access_code: "test-access-1",
-    password: "$2a$10$5cblct/kPaZQ5uh9jNKIVu8.oGiOPDPGB4iZRdNp0E1miYl6jTqXm"
+    password: "$2a$10$5cblct/kPaZQ5uh9jNKIVu8.oGiOPDPGB4iZRdNp0E1miYl6jTqXm",
   },
   { id: "4712", firstName: "Test2", email: "test2@example.com" },
   {
@@ -25,8 +25,8 @@ const users = [
     email: "test3@example.com",
     access_code: "test-access",
     hash: "test-hash",
-    isAdmin: true
-  }
+    isAdmin: true,
+  },
 ]
 users.forEach(user => store.dispatch(models.user.events.userAdded(user)))
 
@@ -49,9 +49,9 @@ describe("auth", () => {
     middleWare: RequestHandler,
     req: Request,
     res: Response,
-    expectedUserId: string
+    expectedUserId: string,
   ) {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       middleWare(req, res, (err: unknown) => {
         expect(err).toBeUndefined()
         expect(userId(req.user)).toBe(expectedUserId)
@@ -64,7 +64,7 @@ describe("auth", () => {
     it("should authenticate with e-mail and password", async () => {
       const req = mockRequest({
         body: { email: "test@example.com", password: "test-pwd" },
-        user: undefined as User | undefined
+        user: undefined as User | undefined,
       })
       await tryMiddleware(auth.requireLogin(), req, mockResponse(), "4711")
     })
@@ -72,10 +72,10 @@ describe("auth", () => {
     it("should generate a JWT if authenticated with e-mail and password", async () => {
       const middleware = auth.requireLogin()
       const req = mockRequest({
-        body: { email: "test@example.com", password: "test-pwd" }
+        body: { email: "test@example.com", password: "test-pwd" },
       })
       const res = mockResponse()
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         middleware(req, res, () => {
           expect(res.cookie.calledOnce).toBe(true)
           expect(res.cookie.args[0][1]).not.toBe("")
@@ -83,12 +83,12 @@ describe("auth", () => {
           jsonwebtoken.verify(
             res.cookie.args[0][1],
             secretOrKey,
-            (err: unknown, decoded) => {
+            (err: unknown, decoded: unknown) => {
               expect(err).toBeNull()
               expect(decoded).toHaveProperty("iat")
               expect(decoded).toHaveProperty("exp")
               resolve()
-            }
+            },
           )
         })
       })
@@ -97,20 +97,20 @@ describe("auth", () => {
     it("should not authenticate with e-mail and wrong password", async () => {
       const middleware = auth.requireLogin()
       const req = mockRequest({
-        body: { email: "test@example.com", password: "wrong-pwd" }
+        body: { email: "test@example.com", password: "wrong-pwd" },
       })
       const res = mockResponse()
       middleware(req, res, () => {
         expect(true).toBe(false)
       })
-      await new Promise(resolve =>
+      await new Promise<void>(resolve =>
         setTimeout(() => {
           expect(res.status.callCount).toBe(1)
           expect(res.status.args[0][0]).toBe(401)
           expect(res.json.callCount).toBe(1)
           expect(res.json.args[0][0]).toEqual({ error: "Not authenticated" })
           resolve()
-        }, 100)
+        }, 100),
       )
     })
   })
@@ -121,7 +121,7 @@ describe("auth", () => {
       const req = mockRequest({
         body: { email: "test3@example.com" },
         headers: { authorization },
-        user: undefined as User | undefined
+        user: undefined as User | undefined,
       })
       await tryMiddleware(auth.checkJWT(), req, mockResponse(), "4712")
     })
@@ -131,7 +131,7 @@ describe("auth", () => {
       const req = mockRequest({
         body: { email: "test3@example.com" },
         cookies: { token },
-        user: undefined as User | undefined
+        user: undefined as User | undefined,
       })
       await tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712")
     })
@@ -143,7 +143,7 @@ describe("auth", () => {
       const req = mockRequest({
         body: { email: "test3@example.com" },
         headers: { authorization },
-        user: undefined as User | undefined
+        user: undefined as User | undefined,
       })
       await tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712")
     })
@@ -153,7 +153,7 @@ describe("auth", () => {
       const req = mockRequest({
         body: { email: "test3@example.com" },
         cookies: { token },
-        user: undefined as User | undefined
+        user: undefined as User | undefined,
       })
       await tryMiddleware(auth.requireJWT(), req, mockResponse(), "4712")
     })
@@ -165,11 +165,11 @@ describe("auth", () => {
       const middleware = auth.requireAdmin()
       const req = mockRequest({ user: { id: 4711 } })
       const res = mockResponse({ status: 403, message: "Not allowed" })
-      await new Promise(resolve =>
+      await new Promise<void>(resolve =>
         middleware(req, res, (err: unknown) => {
           expect(err).toEqual({ status: 403, message: "Not allowed" })
           resolve()
-        })
+        }),
       )
     })
 
@@ -178,10 +178,12 @@ describe("auth", () => {
       const middleware = auth.requireAdmin()
       const req = mockRequest({ user: { id: 4712, isAdmin: true } })
       const res = mockResponse()
-      await new Promise(resolve => middleware(req, res, (err: unknown) => {
-        expect(err).toBeUndefined()
-        resolve()
-      }))
+      await new Promise<void>(resolve =>
+        middleware(req, res, (err: unknown) => {
+          expect(err).toBeUndefined()
+          resolve()
+        }),
+      )
     })
 
     it("should allow access if no admin is defined", async () => {
@@ -189,11 +191,13 @@ describe("auth", () => {
       const middleware = auth.requireAdmin()
       const req = mockRequest({ user: { id: 4711 } })
       const res = mockResponse()
-      await new Promise(resolve => middleware(req, res, (err: unknown) => {
-        expect(err).toBeUndefined()
-        models.user.adminIsDefined = true
-        resolve()
-      }))
+      await new Promise<void>(resolve =>
+        middleware(req, res, (err: unknown) => {
+          expect(err).toBeUndefined()
+          models.user.adminIsDefined = true
+          resolve()
+        }),
+      )
     })
   })
 
