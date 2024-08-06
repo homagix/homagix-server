@@ -13,7 +13,7 @@
     "build": "esbuild --bundle --platform=node --sourcemap ./src --outfile=build/server.js",
     "docker:build": "docker build -t homagix-server:latest .",
     "docker:publish": "docker push homagix-server:latest",
-    "update": "npx -y npm-check-updates -d -u -e 2",
+    "update": "npx -y npm-check-updates -du",
     "start": "NOD_ENV=production node -r dotenv-flow/config build/server.js"
   },
   "author": "Joachim Schirrmacher <joachim@justso.de>",
