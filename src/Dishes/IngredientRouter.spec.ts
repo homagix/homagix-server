@@ -5,12 +5,14 @@ import Router from "./IngredientRouter"
 import Controller from "./IngredientController"
 import Store from "../EventStore/Store.mock"
 import Models from "../models/MockedModel"
+import { RouteHandler } from "../MainRouter"
 
 const store = Store()
 const models = Models({ store })
 const jsonResult =
-  (func: (req: Request) => void) => async (req: Request, res: Response) =>
+  (func: RouteHandler) => async (req: Request, res: Response) => {
     res.json(await func(req))
+  }
 const controller = Controller({ models, store })
 const router = Router({ controller, jsonResult })
 const app = express()
@@ -23,10 +25,10 @@ describe("IngredientRouter", () => {
     const { ingredientAdded } = models.ingredient.events
     models.dish.reset()
     store.dispatch(
-      dishAdded({ id: "_", name: "default", alwaysOnList: true, items: [] })
+      dishAdded({ id: "_", name: "default", alwaysOnList: true, items: [] }),
     )
     store.dispatch(
-      ingredientAdded({ id: "1", name: "Milch", unit: "L", group: "cooled" })
+      ingredientAdded({ id: "1", name: "Milch", unit: "L", group: "cooled" }),
     )
     store.dispatch(ingredientAssigned("_", "1", 3))
   })

@@ -1,7 +1,7 @@
-import express, { Request, Router } from 'express'
-import { JSONHandler } from '../MainRouter'
-import units from '../models/units'
-import { IngredientController } from './IngredientController'
+import express, { Request, Router } from "express"
+import { JSONHandler } from "../MainRouter"
+import units from "../models/units"
+import { IngredientController } from "./IngredientController"
 
 export default function ({
   controller,
@@ -24,10 +24,10 @@ export default function ({
     return controller.addIngredient(req.body)
   }
 
-  router.get('/', jsonResult(controller.getIngredients))
-  router.get('/units', jsonResult(getAvailableUnits))
-  router.put('/:id', jsonResult(setIngredientGroup))
-  router.post('/', jsonResult(addIngredient))
+  router.get("/", jsonResult(controller.getIngredients))
+  router.get("/units", jsonResult(getAvailableUnits))
+  router.put("/:id", jsonResult(setIngredientGroup))
+  router.post("/", jsonResult(addIngredient))
 
   return router
 }
