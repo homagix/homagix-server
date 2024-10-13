@@ -8,7 +8,6 @@ export default defineConfig({
   },
   test: {
     includeSource: ["**/*.ts"],
-    globalSetup: ["test-setup.ts"],
     coverage: {
       provider: "v8",
       all: true,

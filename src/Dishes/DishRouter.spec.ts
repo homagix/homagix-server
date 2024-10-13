@@ -25,8 +25,9 @@ import { User } from "../models/user"
 const store = Store()
 const models = Models({ store })
 const jsonResult =
-  (func: RouteHandler) => async (req: Request, res: Response) =>
+  (func: RouteHandler) => async (req: Request, res: Response) => {
     res.json(await func(req))
+  }
 const dishReader = DishReader({ store, models })
 const dishController = Controller({ store, models, dishReader })
 const router = Router({ jsonResult, dishController })
@@ -43,7 +44,7 @@ async function createPancake(options: Partial<Dish> = {}) {
       name: "Pancake",
       items: [],
       ...options,
-    })
+    }),
   )
 }
 
@@ -303,7 +304,7 @@ describe("DishRouter", () => {
       dishController.removeItem = async (
         dishId: string,
         itemId: string,
-        user: User
+        user: User,
       ) => {
         called = true
         expect(itemId).toBe(bunItem.id)
