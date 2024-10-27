@@ -54,7 +54,7 @@
     "mock-req-res": "1.2.1",
     "prettier": "3.3.3",
     "supertest": "7.0.0",
-    "tsx": "^4.19.1",
+    "tsx": "^4.19.2",
     "typescript": "5.6.3",
     "vitest": "^2.1.3"
   }
