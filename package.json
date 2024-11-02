@@ -48,7 +48,7 @@
     "@typescript-eslint/eslint-plugin": "8.12.2",
     "@vitest/coverage-v8": "^2.1.4",
     "esbuild": "0.24.0",
-    "eslint": "9.13.0",
+    "eslint": "9.14.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
     "mock-req-res": "1.2.1",
