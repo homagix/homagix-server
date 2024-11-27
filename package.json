@@ -39,23 +39,23 @@
     "@types/connect-history-api-fallback": "1.5.4",
     "@types/cookie-parser": "1.4.8",
     "@types/express": "5.0.0",
-    "@types/express-session": "1.18.0",
+    "@types/express-session": "1.18.1",
     "@types/jsonwebtoken": "9.0.7",
     "@types/mock-req-res": "1.1.6",
     "@types/passport": "1.0.17",
     "@types/passport-jwt": "4.0.1",
     "@types/supertest": "6.0.2",
     "@typescript-eslint/eslint-plugin": "8.16.0",
-    "@vitest/coverage-v8": "^2.1.5",
+    "@vitest/coverage-v8": "^2.1.6",
     "esbuild": "0.24.0",
     "eslint": "9.15.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
     "mock-req-res": "1.2.1",
-    "prettier": "3.3.3",
+    "prettier": "3.4.1",
     "supertest": "7.0.0",
     "tsx": "^4.19.2",
     "typescript": "5.7.2",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.6"
   }
 }
