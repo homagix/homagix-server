@@ -52,7 +52,7 @@
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
     "mock-req-res": "1.2.1",
-    "prettier": "3.4.1",
+    "prettier": "3.4.2",
     "supertest": "7.0.0",
     "tsx": "^4.19.2",
     "typescript": "5.7.2",
